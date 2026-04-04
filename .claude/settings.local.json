@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(touch:*)",
+      "Bash(pip install:*)",
+      "Bash(python -c \"from app.main import app; print\\('导入成功'\\)\")"
+    ]
+  }
+}
