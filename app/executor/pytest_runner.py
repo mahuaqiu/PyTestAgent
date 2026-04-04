@@ -19,6 +19,7 @@ class PytestRunner:
 
     def __init__(self):
         self.max_parallel = config.max_parallel
+        self.testcase_timeout = config.testcase_timeout
 
     def _build_command(
         self,
@@ -80,7 +81,7 @@ class PytestRunner:
                 cwd=repo_path,
                 capture_output=True,
                 text=True,
-                timeout=600  # 10分钟超时
+                timeout=self.testcase_timeout  # 可配置超时时间
             )
 
             end_time = datetime.now()

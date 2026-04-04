@@ -95,6 +95,11 @@ class Config:
         return self._get_value(['execution', 'max_parallel']) or 3
 
     @property
+    def testcase_timeout(self) -> int:
+        """单个用例超时时间（秒），默认1小时"""
+        return self._get_value(['execution', 'testcase_timeout']) or 3600
+
+    @property
     def rg_id(self) -> str:
         return self._get_value(['registration', 'rg_id']) or ''
 
