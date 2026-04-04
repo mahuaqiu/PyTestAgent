@@ -1,0 +1,29 @@
+agent:
+  ip: "192.168.0.100"
+  port: 5000
+  version: "1.0"
+  author: "mahuqiu"
+
+scheduler:
+  base_url: "http://scheduler-center:8080"
+
+test_platform:
+  base_url: "http://test-platform:8000"
+
+git:
+  work_dir: "/home"
+  default_branch: "master"
+
+execution:
+  max_parallel: 3
+
+registration:
+  rg_id: ""
+  product_id: ""
+
+heartbeat:
+  interval: 120
+
+report_cleanup:
+  interval: 86400
+  retention_days: 7
