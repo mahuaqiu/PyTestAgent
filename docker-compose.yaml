@@ -1,0 +1,18 @@
+version: "3.8"
+services:
+  pytest-agent:
+    build: .
+    ports:
+      - "${AGENT__PORT:-5000}:5000"
+    environment:
+      - AGENT__IP=${AGENT__IP}
+      - AGENT__PORT=${AGENT__PORT:-5000}
+      - SCHEDULER__BASE_URL=${SCHEDULER__BASE_URL}
+      - TEST_PLATFORM__BASE_URL=${TEST_PLATFORM__BASE_URL}
+      - REGISTRATION__RG_ID=${REGISTRATION__RG_ID}
+      - REGISTRATION__PRODUCT_ID=${REGISTRATION__PRODUCT_ID}
+      - EXECUTION__MAX_PARALLEL=${EXECUTION__MAX_PARALLEL:-3}
+    volumes:
+      - ./logs:/app/logs
+      - ./config.yaml:/app/config.yaml
+    restart: unless-stopped
