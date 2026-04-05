@@ -189,7 +189,8 @@ class TaskManager:
                 total_cases=len(context.testcases),
                 case_name=testcase.name,
                 case_round=int(context.run_round),
-                exec_result=exec_result,
+                repo_path=repo_path,
+                testcase_name=testcase.name,
                 report_url=result_data.get('caseLogUrl')
             )
 
