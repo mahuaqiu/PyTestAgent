@@ -111,7 +111,8 @@ class ReportHandler:
             }
 
         try:
-            soup = BeautifulSoup(open(html_path, 'r', encoding='utf-8').read(), 'html.parser')
+            with open(html_path, 'r', encoding='utf-8') as f:
+                soup = BeautifulSoup(f.read(), 'html.parser')
 
             # 1. 失败步骤名称
             failed_steps = []
