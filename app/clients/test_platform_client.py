@@ -39,7 +39,7 @@ class TestPlatformClient:
 
         for attempt in range(max_retries + 1):
             try:
-                async with httpx.AsyncClient(timeout=60) as client:
+                async with httpx.AsyncClient(timeout=60, verify=False, trust_env=False) as client:
                     if files:
                         # FormData 上传
                         response = await client.post(url, data=data, files=files)

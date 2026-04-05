@@ -47,7 +47,7 @@ class SchedulerClient:
 
         for attempt in range(max_retries + 1):
             try:
-                async with httpx.AsyncClient(timeout=30) as client:
+                async with httpx.AsyncClient(timeout=30, verify=False, trust_env=False) as client:
                     response = await client.post(url, json=data, headers=headers)
                     result = response.json()
                     log_response(request_id, endpoint, result)
