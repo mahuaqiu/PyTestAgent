@@ -8,7 +8,19 @@
       "Bash(.venv/Scripts/python -c \"from app.main import app; print\\('导入成功'\\)\")",
       "Bash(.venv/Scripts/python -c \"from app.config import config; print\\(f'testcase_timeout = {config.testcase_timeout} 秒'\\)\")",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(.venv/Scripts/pip list:*)",
+      "Bash(xxd)",
+      "Bash(pytest tests/test_report_handler.py -v --tb=short)",
+      "WebSearch",
+      "WebFetch(domain:pytest-html.readthedocs.io)",
+      "Bash(python -m pytest tests/test_report_handler.py -v)",
+      "Bash(.venv/Scripts/python:*)",
+      "Bash(git:*)",
+      "Bash(.venv/Scripts/activate)",
+      "Bash(pytest tests/ -v)",
+      "Bash(python -c \"from app.executor.report_handler import report_handler; print\\('OK'\\)\")",
+      "Bash(.venv/Scripts/python.exe -m pytest tests/ -v)"
     ]
   }
 }
