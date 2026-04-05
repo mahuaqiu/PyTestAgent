@@ -66,10 +66,27 @@ class TestPlatformClient:
         case_name: str,
         case_fail_step: str,
         case_fail_log: str,
+        fail_reason: str,
         case_round: int,
         log_url: Optional[str] = None
     ) -> bool:
-        """上报用例失败"""
+        """
+        上报用例失败
+
+        Args:
+            task_id: 任务ID
+            task_name: 任务名称
+            total_cases: 用例总数
+            case_name: 用例名称
+            case_fail_step: 失败步骤
+            case_fail_log: 失败日志
+            fail_reason: 失败原因
+            case_round: 轮次
+            log_url: 报告URL
+
+        Returns:
+            bool: 上报是否成功
+        """
         data = {
             "taskId": task_id,
             "taskName": task_name,
@@ -77,6 +94,7 @@ class TestPlatformClient:
             "caseName": case_name,
             "caseFailStep": case_fail_step,
             "caseFailLog": case_fail_log,
+            "failReason": fail_reason,
             "caseRound": case_round,
             "logUrl": log_url or "",
             "failTime": datetime.now().isoformat()
