@@ -3,9 +3,11 @@
 报告处理模块
 - 上传报告到测试平台
 - 构建上报结果数据
+- 解析 HTML 报告提取失败信息
 """
 from pathlib import Path
 from typing import Dict, Optional
+from bs4 import BeautifulSoup
 from app.clients.test_platform_client import test_platform_client
 from app.executor.pytest_runner import pytest_runner
 from app.utils.logger import logger
@@ -85,6 +87,60 @@ class ReportHandler:
             case_round=case_round,
             log_url=report_url
         )
+
+    def parse_html_report(self, html_path: Path) -> Dict:
+        """
+        从 HTML 报告提取失败信息
+
+        Args:
+            html_path: HTML 报告文件路径
+
+        Returns:
+            Dict: {
+                "caseFailStep": str,   # 失败步骤名称，多个用逗号分隔
+                "caseFailLog": str,    # 失败日志
+                "failReason": str      # 失败原因，多个用逗号分隔
+            }
+        """
+        # HTML 不存在
+        if not html_path.exists():
+            return {
+                "caseFailStep": "",
+                "caseFailLog": "",
+                "failReason": "HTML日志不存在"
+            }
+
+        try:
+            soup = BeautifulSoup(open(html_path, 'r', encoding='utf-8').read(), 'html.parser')
+
+            # 1. 失败步骤名称
+            failed_steps = []
+            failed_steps_div = soup.find('div', class_='failed-steps')
+            if failed_steps_div:
+                steps_list = failed_steps_div.find('ul', class_='failed-steps-list')
+                if steps_list:
+                    failed_steps = [li.text.strip() for li in steps_list.find_all('li')]
+
+            # 2. 失败原因
+            step_errors = soup.find_all('div', class_='step-error')
+            error_reasons = [e.text.strip() for e in step_errors]
+
+            # 3. 失败日志
+            error_box = soup.find('div', class_='error-box')
+            full_error_log = error_box.text.strip() if error_box else ""
+
+            return {
+                "caseFailStep": ", ".join(failed_steps),
+                "caseFailLog": full_error_log,
+                "failReason": ", ".join(error_reasons)
+            }
+        except Exception as e:
+            logger.error(f"HTML 解析异常: {e}")
+            return {
+                "caseFailStep": "",
+                "caseFailLog": "",
+                "failReason": "HTML解析失败"
+            }
 
 
 # 全局报告处理器实例
