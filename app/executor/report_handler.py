@@ -69,21 +69,46 @@ class ReportHandler:
         total_cases: int,
         case_name: str,
         case_round: int,
-        exec_result: Dict,
+        repo_path: Path,
+        testcase_name: str,
         report_url: Optional[str] = None
     ) -> bool:
-        """上报失败详情"""
-        # 提取失败步骤和日志
-        fail_step = ""
-        fail_log = exec_result.get('error', '')[:1024] if exec_result.get('error') else exec_result.get('output', '')[:1024]
+        """
+        上报失败详情
+
+        Args:
+            task_id: 任务ID
+            task_name: 任务名称
+            total_cases: 用例总数
+            case_name: 用例名称
+            case_round: 轮次
+            repo_path: 仓库路径
+            testcase_name: 测试用例名称（用于查找报告）
+            report_url: 报告URL
+
+        Returns:
+            bool: 上报是否成功
+        """
+        # 查找并解析 HTML 报告
+        report_file = pytest_runner.find_report_file(repo_path, testcase_name)
+
+        if report_file:
+            fail_info = self.parse_html_report(report_file)
+        else:
+            fail_info = {
+                "caseFailStep": "",
+                "caseFailLog": "",
+                "failReason": "HTML日志不存在"
+            }
 
         return await test_platform_client.report_fail(
             task_id=task_id,
             task_name=task_name,
             total_cases=total_cases,
             case_name=case_name,
-            case_fail_step=fail_step,
-            case_fail_log=fail_log,
+            case_fail_step=fail_info["caseFailStep"],
+            case_fail_log=fail_info["caseFailLog"],
+            fail_reason=fail_info["failReason"],
             case_round=case_round,
             log_url=report_url
         )
