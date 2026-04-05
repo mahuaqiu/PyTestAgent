@@ -6,7 +6,9 @@
       "Bash(pip install:*)",
       "Bash(python -c \"from app.main import app; print\\('导入成功'\\)\")",
       "Bash(.venv/Scripts/python -c \"from app.main import app; print\\('导入成功'\\)\")",
-      "Bash(.venv/Scripts/python -c \"from app.config import config; print\\(f'testcase_timeout = {config.testcase_timeout} 秒'\\)\")"
+      "Bash(.venv/Scripts/python -c \"from app.config import config; print\\(f'testcase_timeout = {config.testcase_timeout} 秒'\\)\")",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
