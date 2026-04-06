@@ -3,6 +3,12 @@
 测试平台接口客户端
 - fail: 用例失败上报
 - upload: 报告文件上传
+
+响应模型结构:
+{
+    "message": "操作结果信息",
+    "data": { ... }  # 可选，如上传后的访问URL
+}
 """
 import httpx
 import uuid
@@ -102,7 +108,7 @@ class TestPlatformClient:
 
         result = await self._request_with_retry("/api/core/test-report/fail", data)
 
-        if result and result.get("code") == 200:
+        if result and "成功" in result.get("message", ""):
             logger.info("失败上报成功")
             return True
 
@@ -138,7 +144,7 @@ class TestPlatformClient:
                     files=files
                 )
 
-                if result and result.get("code") == 200:
+                if result and "成功" in result.get("message", ""):
                     url = result.get("data", {}).get("url")
                     logger.info(f"报告上传成功，url={url}")
                     return url
