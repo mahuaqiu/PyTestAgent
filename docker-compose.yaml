@@ -15,4 +15,5 @@ services:
     volumes:
       - ./logs:/app/logs
       - ./config.yaml:/app/config.yaml
+      - ./app:/app/app  # 挂载代码目录，支持热更新
     restart: unless-stopped

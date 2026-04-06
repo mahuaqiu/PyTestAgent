@@ -23,6 +23,9 @@ class RepoManager:
 
     def _run_git_command(self, cmd: list, cwd: Optional[Path] = None) -> Tuple[bool, str]:
         """执行 Git 命令"""
+        # 在所有 git 命令前添加忽略证书验证的配置
+        if cmd[0] == 'git':
+            cmd = ['git', '-c', 'http.sslVerify=false'] + cmd[1:]
         try:
             result = subprocess.run(
                 cmd,
