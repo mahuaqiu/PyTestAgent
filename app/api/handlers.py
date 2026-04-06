@@ -24,11 +24,14 @@ async def handle_send_job(request: Request, body: SendJobRequest) -> ApiResponse
     2. 立即返回成功响应
     3. 启动后台任务执行
     """
-    request_id = body.header.request_id
+    # 处理 header 和 param 可能为 None 的情况
+    request_id = body.header.request_id if body.header else uuid.uuid4().hex
+    param_dict = body.param.model_dump() if body.param else {}
 
-    log_request(request_id, "sendJob", body.param.model_dump())
+    log_request(request_id, "sendJob", param_dict)
 
-    logger.info(f"收到任务: task_id={body.param.taskID}")
+    task_id = param_dict.get('taskID', '')
+    logger.info(f"收到任务: task_id={task_id}")
 
     # 构建响应
     response = ApiResponse(
@@ -38,8 +41,9 @@ async def handle_send_job(request: Request, body: SendJobRequest) -> ApiResponse
 
     log_response(request_id, "sendJob", response.model_dump())
 
-    # 启动后台任务执行
-    asyncio.create_task(task_manager.execute_job(body.param.model_dump()))
+    # 启动后台任务执行（仅当有参数时）
+    if param_dict:
+        asyncio.create_task(task_manager.execute_job(param_dict))
 
     return response
 
@@ -52,14 +56,16 @@ async def handle_stop_job(request: Request, body: StopJobRequest) -> ApiResponse
     """
     request_id = request.headers.get('request_id', uuid.uuid4().hex)
 
-    log_request(request_id, "stopJob", body.param.model_dump())
+    param_dict = body.param.model_dump() if body.param else {}
+    log_request(request_id, "stopJob", param_dict)
 
-    task_id = body.param.taskID
+    task_id = param_dict.get('taskID', '')
 
     logger.info(f"收到停止请求: task_id={task_id}")
 
     # 设置停止标志
-    task_manager.stop_current_task(task_id)
+    if task_id:
+        task_manager.stop_current_task(task_id)
 
     # 构建响应
     response = ApiResponse(
@@ -80,9 +86,10 @@ async def handle_close_job(request: Request, body: CloseJobRequest) -> ApiRespon
     """
     request_id = request.headers.get('request_id', uuid.uuid4().hex)
 
-    log_request(request_id, "closeJob", body.param.model_dump())
+    param_dict = body.param.model_dump() if body.param else {}
+    log_request(request_id, "closeJob", param_dict)
 
-    task_id = body.param.taskID
+    task_id = param_dict.get('taskID', '')
 
     logger.info(f"收到关闭请求: task_id={task_id}")
 
