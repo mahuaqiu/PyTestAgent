@@ -35,7 +35,9 @@ class TestPlatformClient:
         request_id = self._generate_request_id()
         url = f"{self.base_url}{endpoint}"
 
-        log_request(request_id, endpoint, data or files)
+        # 记录日志（同时记录 data 和 files）
+        log_data = {"data": data, "files": str(files) if files else None}
+        log_request(request_id, endpoint, log_data)
 
         for attempt in range(max_retries + 1):
             try:
