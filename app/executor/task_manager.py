@@ -205,7 +205,6 @@ class TaskManager:
             results=[result_data],
             tep_id=context.group_id  # groupId 作为 tepID
         )
-        )
 
     async def _complete_task(self, context: TaskContext, success: bool = True):
         """任务完成处理"""
