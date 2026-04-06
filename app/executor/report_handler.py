@@ -22,6 +22,8 @@ class ReportHandler:
         case_round: int,
         repo_path: Path,
         testcase_name: str,
+        testcase_uri: str,
+        group_id: str,
         exec_result: Dict
     ) -> Dict:
         """
@@ -38,7 +40,8 @@ class ReportHandler:
             report_url = await test_platform_client.upload_report(
                 task_id=task_id,
                 case_round=case_round,
-                report_file=report_file
+                report_file=report_file,
+                tep_id=group_id  # groupId 作为 tepID
             )
             if report_url:
                 logger.info(f"报告上传成功: {report_url}")
@@ -57,7 +60,7 @@ class ReportHandler:
             "errorReason": "",
             "failureCause": exec_result.get('error', '')[:1024] if not exec_result.get('success') else "",
             "caseLogUrl": report_url[:255] if report_url else "",
-            "tcid": testcase_name  # 对应 svnScriptPath 作为 tcid
+            "tcid": testcase_uri  # 使用 testcase.uri 作为 tcid
         }
 
         return result_data

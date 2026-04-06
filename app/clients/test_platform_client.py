@@ -113,7 +113,8 @@ class TestPlatformClient:
         self,
         task_id: str,
         case_round: int,
-        report_file: Path
+        report_file: Path,
+        tep_id: str = ""
     ) -> Optional[str]:
         """上传报告文件，返回报告URL"""
         if not report_file.exists():
@@ -123,7 +124,8 @@ class TestPlatformClient:
         # 准备 FormData
         data = {
             "task_id": task_id,
-            "case_round": case_round
+            "case_round": case_round,
+            "tepID": tep_id  # groupId
         }
 
         with open(report_file, 'rb') as f:

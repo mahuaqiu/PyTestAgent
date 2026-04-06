@@ -58,7 +58,8 @@ class TaskManager:
                 name=str(tc.get('name', '')),
                 svn_script_path=str(tc.get('svnScriptPath', '')),
                 schedule_block_id=str(tc.get('scheduleBlockId', '')),
-                exe_platform=str(tc.get('exeplatform', 'PyTestAgent'))
+                exe_platform=str(tc.get('exeplatform', 'PyTestAgent')),
+                uri=str(tc.get('uri', ''))  # 用例唯一标识
             ))
 
         # 创建任务上下文（字段可能是数字或字符串，统一转字符串）
@@ -73,7 +74,8 @@ class TaskManager:
             git_url=git_url,
             branch=branch,
             exe_param=exe_param,
-            testcases=testcases
+            testcases=testcases,
+            group_id=str(inner_param.get('groupId', config.agent_group_id))  # 用于上传报告
         )
 
         return context
@@ -179,6 +181,8 @@ class TaskManager:
             case_round=int(context.run_round),
             repo_path=repo_path,
             testcase_name=testcase.name,
+            testcase_uri=testcase.uri,  # 使用 testcase.uri 作为 tcid
+            group_id=context.group_id,  # groupId 作为 tepID
             exec_result=exec_result
         )
 

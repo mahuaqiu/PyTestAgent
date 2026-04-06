@@ -18,6 +18,7 @@ class TestCaseInfo:
     svn_script_path: str
     schedule_block_id: str
     exe_platform: str = "PyTestAgent"
+    uri: str = ""  # 用例唯一标识，用于上报 tcid
 
 
 @dataclass
@@ -34,6 +35,7 @@ class TaskContext:
     branch: str = "master"
     exe_param: Dict = field(default_factory=dict)
     testcases: List[TestCaseInfo] = field(default_factory=list)
+    group_id: str = ""  # 用于上传报告时的 tepID
 
     # 执行状态
     stop_requested: bool = False
