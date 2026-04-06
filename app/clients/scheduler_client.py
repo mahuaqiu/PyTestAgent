@@ -110,7 +110,8 @@ class SchedulerClient:
         self,
         testcase_block_id: str,
         round: str,
-        results: List[Dict]
+        results: List[Dict],
+        tep_id: str = ""
     ) -> bool:
         """上报用例执行结果"""
         data = {
@@ -119,7 +120,8 @@ class SchedulerClient:
                 "results": results,
                 "round": round,
                 "testcaseBlockID": testcase_block_id,
-                "realTepIp": ""
+                "realTepIp": "",
+                "tepID": tep_id  # groupId
             }
         }
 

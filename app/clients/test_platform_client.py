@@ -35,9 +35,7 @@ class TestPlatformClient:
         request_id = self._generate_request_id()
         url = f"{self.base_url}{endpoint}"
 
-        # 记录日志（同时记录 data 和 files）
-        log_data = {"data": data, "files": str(files) if files else None}
-        log_request(request_id, endpoint, log_data)
+        log_request(request_id, endpoint, data or files)
 
         for attempt in range(max_retries + 1):
             try:
@@ -115,8 +113,7 @@ class TestPlatformClient:
         self,
         task_id: str,
         case_round: int,
-        report_file: Path,
-        tep_id: str = ""
+        report_file: Path
     ) -> Optional[str]:
         """上传报告文件，返回报告URL"""
         if not report_file.exists():
@@ -126,8 +123,7 @@ class TestPlatformClient:
         # 准备 FormData
         data = {
             "task_id": task_id,
-            "case_round": case_round,
-            "tepID": tep_id  # groupId
+            "case_round": case_round
         }
 
         with open(report_file, 'rb') as f:

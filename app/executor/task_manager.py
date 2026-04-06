@@ -182,7 +182,6 @@ class TaskManager:
             repo_path=repo_path,
             testcase_name=testcase.name,
             testcase_uri=testcase.uri,  # 使用 testcase.uri 作为 tcid
-            group_id=context.group_id,  # groupId 作为 tepID
             exec_result=exec_result
         )
 
@@ -203,7 +202,9 @@ class TaskManager:
         await scheduler_client.report(
             testcase_block_id=context.testcase_block_id,
             round=context.run_round,
-            results=[result_data]
+            results=[result_data],
+            tep_id=context.group_id  # groupId 作为 tepID
+        )
         )
 
     async def _complete_task(self, context: TaskContext, success: bool = True):

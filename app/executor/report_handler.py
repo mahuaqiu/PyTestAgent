@@ -23,7 +23,6 @@ class ReportHandler:
         repo_path: Path,
         testcase_name: str,
         testcase_uri: str,
-        group_id: str,
         exec_result: Dict
     ) -> Dict:
         """
@@ -40,8 +39,7 @@ class ReportHandler:
             report_url = await test_platform_client.upload_report(
                 task_id=task_id,
                 case_round=case_round,
-                report_file=report_file,
-                tep_id=group_id  # groupId 作为 tepID
+                report_file=report_file
             )
             if report_url:
                 logger.info(f"报告上传成功: {report_url}")
