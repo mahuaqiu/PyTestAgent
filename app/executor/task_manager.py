@@ -49,27 +49,27 @@ class TaskManager:
 
         branch = exe_param.get('branch', config.git_default_branch)
 
-        # 解析 testcase 列表
+        # 解析 testcase 列表（字段可能是数字或字符串，统一转字符串）
         testcase_list = inner_param.get('testcase', [])
         testcases = []
         for tc in testcase_list:
             testcases.append(TestCaseInfo(
-                number=tc.get('number', ''),
-                name=tc.get('name', ''),
-                svn_script_path=tc.get('svnScriptPath', ''),
-                schedule_block_id=tc.get('scheduleBlockId', ''),
-                exe_platform=tc.get('exeplatform', 'PyTestAgent')
+                number=str(tc.get('number', '')),
+                name=str(tc.get('name', '')),
+                svn_script_path=str(tc.get('svnScriptPath', '')),
+                schedule_block_id=str(tc.get('scheduleBlockId', '')),
+                exe_platform=str(tc.get('exeplatform', 'PyTestAgent'))
             ))
 
-        # 创建任务上下文
+        # 创建任务上下文（字段可能是数字或字符串，统一转字符串）
         context = TaskContext(
-            task_id=inner_param.get('taskID', ''),
-            task_project_id=inner_param.get('taskProjectID', ''),
-            task_project_name=inner_param.get('taskProjectName', ''),
-            testcase_block_id=inner_param.get('testcaseBlockID', ''),
-            scheduler_block_id=inner_param.get('schedulerBlockID', ''),
-            run_round=inner_param.get('runRound', '1'),
-            task_type=inner_param.get('taskType', '4'),
+            task_id=str(inner_param.get('taskID', '')),
+            task_project_id=str(inner_param.get('taskProjectID', '')),
+            task_project_name=str(inner_param.get('taskProjectName', '')),
+            testcase_block_id=str(inner_param.get('testcaseBlockID', '')),
+            scheduler_block_id=str(inner_param.get('schedulerBlockID', '')),
+            run_round=str(inner_param.get('runRound', '1')),
+            task_type=str(inner_param.get('taskType', '4') or '4'),  # taskType 可能是空字符串
             git_url=git_url,
             branch=branch,
             exe_param=exe_param,

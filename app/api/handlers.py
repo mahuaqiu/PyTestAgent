@@ -10,11 +10,19 @@ import uuid
 from fastapi import Request
 from app.api.schemas import (
     SendJobRequest, StopJobRequest, CloseJobRequest,
-    ApiResponse, ResponseParam, ResponseHeader
+    ApiResponse, ResponseParam
 )
 from app.executor.task_manager import task_manager
 from app.models.task_context import task_context_manager
 from app.utils.logger import logger, log_request, log_response
+
+
+def _get_request_id(header: dict) -> str:
+    """从 header 中获取 request_id，兼容多种命名"""
+    if not header:
+        return uuid.uuid4().hex
+    # 支持多种命名方式
+    return header.get('requestID') or header.get('request_id') or uuid.uuid4().hex
 
 
 async def handle_send_job(request: Request, body: SendJobRequest) -> ApiResponse:
@@ -24,9 +32,8 @@ async def handle_send_job(request: Request, body: SendJobRequest) -> ApiResponse
     2. 立即返回成功响应
     3. 启动后台任务执行
     """
-    # 处理 header 和 param 可能为 None 的情况
-    request_id = body.header.request_id if body.header else uuid.uuid4().hex
-    param_dict = body.param.model_dump() if body.param else {}
+    request_id = _get_request_id(body.header)
+    param_dict = body.param or {}
 
     log_request(request_id, "sendJob", param_dict)
 
@@ -36,7 +43,7 @@ async def handle_send_job(request: Request, body: SendJobRequest) -> ApiResponse
     # 构建响应
     response = ApiResponse(
         param=ResponseParam(status="ok", result=""),
-        header=ResponseHeader(request_id=request_id)
+        header={"requestID": request_id}
     )
 
     log_response(request_id, "sendJob", response.model_dump())
@@ -54,12 +61,13 @@ async def handle_stop_job(request: Request, body: StopJobRequest) -> ApiResponse
     1. 设置停止标志
     2. 立即返回成功响应
     """
-    request_id = request.headers.get('request_id', uuid.uuid4().hex)
+    request_id = _get_request_id(body.header)
 
-    param_dict = body.param.model_dump() if body.param else {}
+    param_dict = body.param or {}
     log_request(request_id, "stopJob", param_dict)
 
-    task_id = param_dict.get('taskID', '')
+    # 兼容数字类型的 taskID
+    task_id = str(param_dict.get('taskID', '') or '')
 
     logger.info(f"收到停止请求: task_id={task_id}")
 
@@ -70,7 +78,7 @@ async def handle_stop_job(request: Request, body: StopJobRequest) -> ApiResponse
     # 构建响应
     response = ApiResponse(
         param=ResponseParam(status="ok", result=""),
-        header=ResponseHeader(request_id=request_id)
+        header={"requestID": request_id}
     )
 
     log_response(request_id, "stopJob", response.model_dump())
@@ -84,12 +92,13 @@ async def handle_close_job(request: Request, body: CloseJobRequest) -> ApiRespon
     1. 清理任务上下文
     2. 立即返回成功响应
     """
-    request_id = request.headers.get('request_id', uuid.uuid4().hex)
+    request_id = _get_request_id(body.header)
 
-    param_dict = body.param.model_dump() if body.param else {}
+    param_dict = body.param or {}
     log_request(request_id, "closeJob", param_dict)
 
-    task_id = param_dict.get('taskID', '')
+    # 兼容数字类型的 taskID
+    task_id = str(param_dict.get('taskID', '') or '')
 
     logger.info(f"收到关闭请求: task_id={task_id}")
 
@@ -99,7 +108,7 @@ async def handle_close_job(request: Request, body: CloseJobRequest) -> ApiRespon
     # 构建响应
     response = ApiResponse(
         param=ResponseParam(status="ok", result=""),
-        header=ResponseHeader(request_id=request_id)
+        header={"requestID": request_id}
     )
 
     log_response(request_id, "closeJob", response.model_dump())
