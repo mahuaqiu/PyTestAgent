@@ -26,9 +26,9 @@ async def handle_send_job(request: Request, body: SendJobRequest) -> ApiResponse
     """
     request_id = body.header.request_id
 
-    log_request(request_id, "sendJob", body.param)
+    log_request(request_id, "sendJob", body.param.model_dump())
 
-    logger.info(f"收到任务: task_id={body.param.get('param', {}).get('taskID', '')}")
+    logger.info(f"收到任务: task_id={body.param.taskID}")
 
     # 构建响应
     response = ApiResponse(
@@ -39,7 +39,7 @@ async def handle_send_job(request: Request, body: SendJobRequest) -> ApiResponse
     log_response(request_id, "sendJob", response.model_dump())
 
     # 启动后台任务执行
-    asyncio.create_task(task_manager.execute_job(body.param))
+    asyncio.create_task(task_manager.execute_job(body.param.model_dump()))
 
     return response
 

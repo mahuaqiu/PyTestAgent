@@ -28,7 +28,8 @@ class TaskManager:
 
     def _parse_job_params(self, param: Dict) -> TaskContext:
         """解析任务参数"""
-        inner_param = param.get('param', {})
+        # 直接使用 param，适配调度中心的单层结构
+        inner_param = param
 
         # 解析 userExtendContent
         user_extend_content = inner_param.get('userExtendContent', '{}')
@@ -92,7 +93,7 @@ class TaskManager:
             # 准备仓库
             success, repo_path, error = repo_manager.prepare_repo(
                 context.git_url,
-                param.get('param', {}).get('userExtendContent', '{}')
+                param.get('userExtendContent', '{}')
             )
 
             if not success:

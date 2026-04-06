@@ -41,7 +41,7 @@ class JobParamModel(BaseModel):
 class SendJobRequest(BaseModel):
     """sendJob 请求模型"""
     header: HeaderModel
-    param: Dict[str, Any]  # 包含 param 字段
+    param: JobParamModel  # 直接使用 JobParamModel，适配调度中心的单层 param 结构
 
 
 class StopJobParam(BaseModel):
