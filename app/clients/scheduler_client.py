@@ -147,7 +147,7 @@ class SchedulerClient:
             "schedulerID": scheduler_block_id,
             "round": int(round),
             "tcBlockID": testcase_block_id,
-            "groupId": config.agent_group_id,
+            "groupID": config.agent_group_id,
             "result": "complete",
             "exceptionReason": ""
         }
