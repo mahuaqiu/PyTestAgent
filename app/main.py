@@ -7,12 +7,38 @@ FastAPI 应用入口
 - 关闭时停止定时任务
 """
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from starlette.middleware.base import BaseHTTPMiddleware
 from app.api.routes import router
 from app.clients.scheduler_client import scheduler_client
 from app.utils.scheduler import scheduler_service
 from app.utils.logger import logger
 from app.config import config
+import json
+
+
+class RawBodyLoggerMiddleware(BaseHTTPMiddleware):
+    """捕获原始请求体的中间件，用于调试请求格式"""
+
+    async def dispatch(self, request: Request, call_next):
+        # 只记录 POST 请求的 body
+        if request.method == "POST":
+            try:
+                # 读取原始 body
+                body_bytes = await request.body()
+                body_str = body_bytes.decode('utf-8')
+
+                # 尝试解析 JSON 并记录
+                try:
+                    body_json = json.loads(body_str)
+                    logger.info(f"[RAW_REQUEST] path={request.url.path}, body={json.dumps(body_json, ensure_ascii=False)}")
+                except json.JSONDecodeError:
+                    logger.warning(f"[RAW_REQUEST] path={request.url.path}, body=非JSON内容: {body_str[:500]}")
+            except Exception as e:
+                logger.error(f"[RAW_REQUEST_ERROR] 无法读取请求体: {e}")
+
+        response = await call_next(request)
+        return response
 
 
 @asynccontextmanager
@@ -44,6 +70,9 @@ def create_app() -> FastAPI:
         version=config.agent_version,
         lifespan=lifespan
     )
+
+    # 注册中间件（捕获原始请求体，用于调试）
+    app.add_middleware(RawBodyLoggerMiddleware)
 
     # 注册路由
     app.include_router(router)
