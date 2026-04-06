@@ -180,7 +180,7 @@ class TaskManager:
             task_id=context.task_id,
             case_round=int(context.run_round),
             repo_path=repo_path,
-            testcase_name=testcase.name,
+            testcase_number=testcase.number,
             testcase_uri=testcase.uri,  # 使用 testcase.uri 作为 tcid
             exec_result=exec_result
         )
@@ -194,7 +194,7 @@ class TaskManager:
                 case_name=testcase.name,
                 case_round=int(context.run_round),
                 repo_path=repo_path,
-                testcase_name=testcase.name,
+                testcase_number=testcase.number,
                 report_url=result_data.get('caseLogUrl')
             )
 

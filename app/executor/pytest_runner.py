@@ -129,20 +129,46 @@ class PytestRunner:
     def find_report_file(
         self,
         repo_path: Path,
-        testcase_name: str
+        testcase_number: str
     ) -> Optional[Path]:
         """
         查找测试报告文件
-        报告位于 {repo_path}/report/{testcase_name}.html
+        报告位于 {repo_path}/report/{timestamp}/{number}.html
+        并行执行可能生成多个时间戳目录，在最新的几个目录中查找，返回最新的报告文件
         """
         report_dir = repo_path / 'report'
-        report_file = report_dir / f'{testcase_name}.html'
 
-        if report_file.exists():
-            logger.info(f"找到报告文件: {report_file}")
-            return report_file
+        if not report_dir.exists():
+            logger.warning(f"报告目录不存在: {report_dir}")
+            return None
 
-        logger.warning(f"报告文件不存在: {report_file}")
+        # 查找所有时间戳子目录（格式如 2026_04_06_22_37_05）
+        timestamp_dirs = []
+        for subdir in report_dir.iterdir():
+            if subdir.is_dir():
+                try:
+                    # 目录名格式: YYYY_MM_DD_HH_MM_SS
+                    timestamp = datetime.strptime(subdir.name, '%Y_%m_%d_%H_%M_%S')
+                    timestamp_dirs.append((timestamp, subdir))
+                except ValueError:
+                    continue
+
+        if not timestamp_dirs:
+            logger.warning(f"没有找到时间戳目录")
+            return None
+
+        # 按时间戳降序排序
+        timestamp_dirs.sort(key=lambda x: x[0], reverse=True)
+
+        # 在最新的几个目录中查找 {number}.html，返回最新的
+        report_file_name = f'{testcase_number}.html'
+        for timestamp, dir_path in timestamp_dirs[:5]:  # 只检查最新的5个目录
+            report_file = dir_path / report_file_name
+            if report_file.exists():
+                logger.info(f"找到报告文件: {report_file}")
+                return report_file
+
+        logger.warning(f"报告文件不存在: {report_file_name}")
         return None
 
 

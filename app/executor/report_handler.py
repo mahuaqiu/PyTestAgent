@@ -21,7 +21,7 @@ class ReportHandler:
         task_id: str,
         case_round: int,
         repo_path: Path,
-        testcase_name: str,
+        testcase_number: str,
         testcase_uri: str,
         exec_result: Dict
     ) -> Dict:
@@ -30,7 +30,7 @@ class ReportHandler:
         返回上报用的结果数据
         """
         # 查找报告文件
-        report_file = pytest_runner.find_report_file(repo_path, testcase_name)
+        report_file = pytest_runner.find_report_file(repo_path, testcase_number)
 
         report_url = ""
 
@@ -71,7 +71,7 @@ class ReportHandler:
         case_name: str,
         case_round: int,
         repo_path: Path,
-        testcase_name: str,
+        testcase_number: str,
         report_url: Optional[str] = None
     ) -> bool:
         """
@@ -84,14 +84,14 @@ class ReportHandler:
             case_name: 用例名称
             case_round: 轮次
             repo_path: 仓库路径
-            testcase_name: 测试用例名称（用于查找报告）
+            testcase_number: 测试用例编号（用于查找报告）
             report_url: 报告URL
 
         Returns:
             bool: 上报是否成功
         """
         # 查找并解析 HTML 报告
-        report_file = pytest_runner.find_report_file(repo_path, testcase_name)
+        report_file = pytest_runner.find_report_file(repo_path, testcase_number)
 
         if report_file:
             fail_info = self.parse_html_report(report_file)
