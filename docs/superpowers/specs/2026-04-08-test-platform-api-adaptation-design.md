@@ -62,6 +62,14 @@
 - `param.runRound`: 执行轮次
 - `testcase[].testcaseBlockId`: 单个用例的块 ID（可选）
 
+### 4. scheduler_client 接口说明
+
+`scheduler_client.report` 和 `scheduler_client.complete` 方法已使用正确的参数名：
+- 使用 `testcase_block_id`（对应接口的 `testcaseBlockID`）
+- 使用 `round`（对应接口的 `round`）
+
+**无需修改 scheduler_client.py**，只需在 task_manager 中正确传递 context 中的字段即可。
+
 ## 设计方案
 
 采用**最小化改动**方案，只修改必要的参数名称和添加新字段。
