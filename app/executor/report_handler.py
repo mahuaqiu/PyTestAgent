@@ -67,11 +67,11 @@ class ReportHandler:
 
     async def report_failure(
         self,
-        task_id: str,
+        task_project_id: str,
         task_name: str,
-        total_cases: int,
         case_name: str,
-        case_round: int,
+        round: int,
+        testcase_block_id: str,
         repo_path: Path,
         testcase_number: str,
         report_url: Optional[str] = None
@@ -80,11 +80,11 @@ class ReportHandler:
         上报失败详情
 
         Args:
-            task_id: 任务ID
+            task_project_id: 任务项目ID
             task_name: 任务名称
-            total_cases: 用例总数
             case_name: 用例名称
-            case_round: 轮次
+            round: 轮次
+            testcase_block_id: 用例块ID
             repo_path: 仓库路径
             testcase_number: 测试用例编号（用于查找报告）
             report_url: 报告URL
@@ -105,14 +105,14 @@ class ReportHandler:
             }
 
         return await test_platform_client.report_fail(
-            task_id=task_id,
+            task_project_id=task_project_id,
             task_name=task_name,
-            total_cases=total_cases,
             case_name=case_name,
             case_fail_step=fail_info["caseFailStep"],
             case_fail_log=fail_info["caseFailLog"],
             fail_reason=fail_info["failReason"],
-            case_round=case_round,
+            round=round,
+            testcase_block_id=testcase_block_id,
             log_url=report_url
         )
 
