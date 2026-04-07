@@ -66,42 +66,42 @@ class TestPlatformClient:
 
     async def report_fail(
         self,
-        task_id: str,
+        task_project_id: str,
         task_name: str,
-        total_cases: int,
         case_name: str,
         case_fail_step: str,
         case_fail_log: str,
         fail_reason: str,
-        case_round: int,
+        round: int,
+        testcase_block_id: str,
         log_url: Optional[str] = None
     ) -> bool:
         """
         上报用例失败
 
         Args:
-            task_id: 任务ID
+            task_project_id: 任务项目ID
             task_name: 任务名称
-            total_cases: 用例总数
             case_name: 用例名称
             case_fail_step: 失败步骤
             case_fail_log: 失败日志
             fail_reason: 失败原因
-            case_round: 轮次
+            round: 轮次
+            testcase_block_id: 用例块ID
             log_url: 报告URL
 
         Returns:
             bool: 上报是否成功
         """
         data = {
-            "taskId": task_id,
+            "taskProjectID": task_project_id,
             "taskName": task_name,
-            "totalCases": total_cases,
             "caseName": case_name,
             "caseFailStep": case_fail_step,
             "caseFailLog": case_fail_log,
             "failReason": fail_reason,
-            "caseRound": case_round,
+            "round": round,
+            "testcaseBlockID": testcase_block_id,
             "logUrl": log_url or "",
             "failTime": datetime.now().isoformat()
         }
