@@ -57,7 +57,7 @@ class ReportHandler:
             "Result": result_code,
             "errorReason": "",
             "failureCause": exec_result.get('error', '')[:1024] if not exec_result.get('success') else "",
-            "caseLogUrl": report_url[:255] if report_url else "",
+            "caseLogUri": report_url[:255] if report_url else "",
             "tcid": testcase_uri  # 使用 testcase.uri 作为 tcid
         }
 

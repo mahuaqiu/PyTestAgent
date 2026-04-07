@@ -195,7 +195,7 @@ class TaskManager:
                 case_round=int(context.run_round),
                 repo_path=repo_path,
                 testcase_number=testcase.number,
-                report_url=result_data.get('caseLogUrl')
+                report_url=result_data.get('caseLogUri')
             )
 
         # 上报结果到调度中心
