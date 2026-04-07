@@ -14,7 +14,7 @@ from app.api.schemas import (
 )
 from app.executor.task_manager import task_manager
 from app.models.task_context import task_context_manager
-from app.utils.logger import logger, log_request, log_response
+from app.utils.logger import logger, log_response
 
 
 def _get_request_id(header: dict) -> str:
@@ -34,8 +34,6 @@ async def handle_send_job(request: Request, body: SendJobRequest) -> ApiResponse
     """
     request_id = _get_request_id(body.header)
     param_dict = body.param or {}
-
-    log_request(request_id, "sendJob", param_dict)
 
     task_id = param_dict.get('taskID', '')
     logger.info(f"收到任务: task_id={task_id}")
@@ -64,7 +62,6 @@ async def handle_stop_job(request: Request, body: StopJobRequest) -> ApiResponse
     request_id = _get_request_id(body.header)
 
     param_dict = body.param or {}
-    log_request(request_id, "stopJob", param_dict)
 
     # 兼容数字类型的 taskID
     task_id = str(param_dict.get('taskID', '') or '')
@@ -95,7 +92,6 @@ async def handle_close_job(request: Request, body: CloseJobRequest) -> ApiRespon
     request_id = _get_request_id(body.header)
 
     param_dict = body.param or {}
-    log_request(request_id, "closeJob", param_dict)
 
     # 兼容数字类型的 taskID
     task_id = str(param_dict.get('taskID', '') or '')
