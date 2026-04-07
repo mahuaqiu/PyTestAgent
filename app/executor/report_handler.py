@@ -18,8 +18,9 @@ class ReportHandler:
 
     async def process_report(
         self,
-        task_id: str,
-        case_round: int,
+        task_project_id: str,
+        round: int,
+        testcase_block_id: str,
         repo_path: Path,
         testcase_number: str,
         testcase_uri: str,
@@ -37,8 +38,9 @@ class ReportHandler:
         # 上传报告
         if report_file:
             report_url = await test_platform_client.upload_report(
-                task_id=task_id,
-                case_round=case_round,
+                task_project_id=task_project_id,
+                round=round,
+                testcase_block_id=testcase_block_id,
                 report_file=report_file
             )
             if report_url:
