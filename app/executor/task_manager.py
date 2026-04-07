@@ -177,8 +177,9 @@ class TaskManager:
 
         # 处理报告和上报
         result_data = await report_handler.process_report(
-            task_id=context.task_id,
-            case_round=int(context.run_round),
+            task_project_id=context.task_project_id,
+            round=int(context.run_round),
+            testcase_block_id=context.testcase_block_id,
             repo_path=repo_path,
             testcase_number=testcase.number,
             testcase_uri=testcase.uri,  # 使用 testcase.uri 作为 tcid
@@ -188,11 +189,11 @@ class TaskManager:
         # 失败时上报到测试平台
         if not exec_result.get('success'):
             await report_handler.report_failure(
-                task_id=context.task_id,
+                task_project_id=context.task_project_id,
                 task_name=context.task_project_name,
-                total_cases=len(context.testcases),
                 case_name=testcase.name,
-                case_round=int(context.run_round),
+                round=int(context.run_round),
+                testcase_block_id=context.testcase_block_id,
                 repo_path=repo_path,
                 testcase_number=testcase.number,
                 report_url=result_data.get('caseLogUri')
