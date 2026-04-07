@@ -117,8 +117,9 @@ class TestPlatformClient:
 
     async def upload_report(
         self,
-        task_id: str,
-        case_round: int,
+        task_project_id: str,
+        round: int,
+        testcase_block_id: str,
         report_file: Path
     ) -> Optional[str]:
         """上传报告文件，返回报告URL"""
@@ -128,8 +129,9 @@ class TestPlatformClient:
 
         # 准备 FormData
         data = {
-            "task_id": task_id,
-            "case_round": case_round
+            "taskProjectID": task_project_id,
+            "round": round,
+            "testcaseBlockID": testcase_block_id
         }
 
         with open(report_file, 'rb') as f:
