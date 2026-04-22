@@ -9,7 +9,6 @@ import asyncio
 import json
 from typing import Dict
 from datetime import datetime
-from concurrent.futures import ThreadPoolExecutor
 from app.config import config
 from app.models.task_context import TaskContext, TestCaseInfo, TaskContextManager
 from app.git_ops.repo_manager import repo_manager
@@ -24,7 +23,6 @@ class TaskManager:
 
     def __init__(self):
         self.context_manager = TaskContextManager()
-        self.executor = ThreadPoolExecutor(max_workers=config.max_parallel)
 
     def _parse_job_params(self, param: Dict) -> TaskContext:
         """解析任务参数"""
@@ -70,7 +68,7 @@ class TaskManager:
             testcase_block_id=str(inner_param.get('testcaseBlockID', '')),
             scheduler_block_id=str(inner_param.get('schedulerBlockID', '')),
             run_round=str(inner_param.get('runRound', '1')),
-            task_type=str(inner_param.get('taskType', '4') or '4'),  # taskType 可能是空字符串
+            execute_type=int(inner_param.get('executeType', 1) or 1),  # executeType 默认串行
             git_url=git_url,
             branch=branch,
             exe_param=exe_param,
@@ -105,9 +103,9 @@ class TaskManager:
                 return
 
             # 判断执行模式
-            is_parallel = context.task_type == '5'
+            is_parallel = context.execute_type == 2
 
-            logger.info(f"执行模式: {'并行' if is_parallel else '串行'}")
+            logger.info(f"执行模式: {'并行' if is_parallel else '串行'}, 最大并发数: {config.max_parallel}")
 
             # 执行测试用例
             if is_parallel:
@@ -163,16 +161,18 @@ class TaskManager:
         index: int
     ):
         """执行单个用例并上报"""
-        logger.info(f"执行用例 [{index}]: {testcase.name}")
+        # 生成执行ID（用于日志追踪）
+        execution_id = testcase.number
 
-        # 执行测试
-        is_parallel = context.task_type == '5'
-        success, exec_result = pytest_runner.run_testcase(
+        logger.info(f"[{execution_id}] 执行用例: {testcase.name}")
+
+        # 执行测试（异步调用）
+        success, exec_result = await pytest_runner.run_testcase(
             repo_path=repo_path,
             svn_script_path=testcase.svn_script_path,
             testcase_name=testcase.name,
             exe_param=context.exe_param,
-            parallel=is_parallel and len(context.testcases) > 1
+            execution_id=execution_id
         )
 
         # 处理报告和上报

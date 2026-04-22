@@ -2,10 +2,10 @@
 """
 pytest 执行器
 - 构建执行命令
-- 执行 pytest 测试
+- 异步执行 pytest 测试
 - 解析执行结果
 """
-import subprocess
+import asyncio
 import json
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional
@@ -18,14 +18,12 @@ class PytestRunner:
     """pytest 执行器"""
 
     def __init__(self):
-        self.max_parallel = config.max_parallel
         self.testcase_timeout = config.testcase_timeout
 
     def _build_command(
         self,
         test_path: Path,
-        exe_param: Dict,
-        parallel: bool = False
+        exe_param: Dict
     ) -> List[str]:
         """构建 pytest 执行命令"""
         cmd = ['pytest', str(test_path)]
@@ -34,29 +32,34 @@ class PytestRunner:
         exe_param_json = json.dumps(exe_param, ensure_ascii=False)
         cmd.append(f'--exeParam={exe_param_json}')
 
-        # 并行模式
-        if parallel:
-            cmd.extend(['-n', str(self.max_parallel)])
-
         return cmd
 
-    def run_testcase(
+    async def run_testcase(
         self,
         repo_path: Path,
         svn_script_path: str,
         testcase_name: str,
         exe_param: Dict,
-        parallel: bool = False
+        execution_id: str
     ) -> Tuple[bool, Dict]:
         """
-        执行单个测试用例
-        返回: (成功标志, 结果信息)
+        异步执行单个测试用例
+        每个用例在独立进程中执行，互不影响
+
+        Args:
+            repo_path: 仓库路径
+            svn_script_path: 测试脚本路径
+            testcase_name: 用例名称
+            exe_param: 执行参数
+            execution_id: 执行ID（用于日志追踪）
+
+        Returns: (成功标志, 结果信息)
         """
         # 拼接完整路径
         test_path = repo_path / svn_script_path
 
         if not test_path.exists():
-            logger.error(f"测试文件不存在: {test_path}")
+            logger.error(f"[{execution_id}] 测试文件不存在: {test_path}")
             return False, {
                 'success': False,
                 'error': '测试文件不存在',
@@ -64,50 +67,73 @@ class PytestRunner:
                 'end_time': int(datetime.now().timestamp() * 1000)
             }
 
-        logger.info(f"开始执行测试: {test_path}")
+        logger.info(f"[{execution_id}] 开始执行测试: {test_path}")
 
         # 构建命令
-        cmd = self._build_command(test_path, exe_param, parallel)
-        logger.debug(f"执行命令: {cmd}")
+        cmd = self._build_command(test_path, exe_param)
+        logger.debug(f"[{execution_id}] 执行命令: {' '.join(cmd)}")
 
         # 记录开始时间
         begin_time = datetime.now()
         begin_timestamp = int(begin_time.timestamp() * 1000)
 
         try:
-            # 执行 pytest
-            result = subprocess.run(
-                cmd,
+            # 异步执行 pytest（使用 asyncio.create_subprocess_exec）
+            process = await asyncio.create_subprocess_exec(
+                *cmd,
                 cwd=repo_path,
-                capture_output=True,
-                text=True,
-                timeout=self.testcase_timeout  # 可配置超时时间
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE
+            )
+
+            # 等待执行完成（带超时控制）
+            stdout, stderr = await asyncio.wait_for(
+                process.communicate(),
+                timeout=self.testcase_timeout
             )
 
             end_time = datetime.now()
             end_timestamp = int(end_time.timestamp() * 1000)
 
             # 判断执行结果
-            success = result.returncode == 0
+            success = process.returncode == 0
 
-            output = result.stdout + result.stderr
+            stdout_text = stdout.decode('utf-8', errors='replace')
+            stderr_text = stderr.decode('utf-8', errors='replace')
 
-            logger.info(f"测试执行完成: {testcase_name}, 结果: {'成功' if success else '失败'}")
-            logger.debug(f"执行输出: {output[:500]}")
+            logger.info(f"[{execution_id}] 测试执行完成: {testcase_name}, 结果: {'成功' if success else '失败'}")
+
+            # 逐行输出 pytest 日志（带 execution_id 标识，便于 grep）
+            if stderr_text:
+                for line in stderr_text.strip().split('\n'):
+                    if line.strip():
+                        logger.info(f"[{execution_id}] {line}")
+
+            if stdout_text:
+                for line in stdout_text.strip().split('\n'):
+                    if line.strip():
+                        logger.debug(f"[{execution_id}] {line}")
 
             return True, {
                 'success': success,
                 'begin_time': begin_timestamp,
                 'end_time': end_timestamp,
-                'output': output,
-                'returncode': result.returncode
+                'output': stdout_text + stderr_text,
+                'returncode': process.returncode
             }
 
-        except subprocess.TimeoutExpired:
+        except asyncio.TimeoutError:
             end_time = datetime.now()
             end_timestamp = int(end_time.timestamp() * 1000)
 
-            logger.error(f"测试执行超时: {testcase_name}")
+            # 超时时终止进程
+            try:
+                process.kill()
+                await process.wait()
+            except:
+                pass
+
+            logger.error(f"[{execution_id}] 测试执行超时: {testcase_name}")
             return False, {
                 'success': False,
                 'begin_time': begin_timestamp,
@@ -118,7 +144,7 @@ class PytestRunner:
             end_time = datetime.now()
             end_timestamp = int(end_time.timestamp() * 1000)
 
-            logger.error(f"测试执行异常: {testcase_name}, 错误: {e}")
+            logger.error(f"[{execution_id}] 测试执行异常: {testcase_name}, 错误: {e}")
             return False, {
                 'success': False,
                 'begin_time': begin_timestamp,

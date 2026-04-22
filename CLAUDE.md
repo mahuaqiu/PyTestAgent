@@ -62,8 +62,10 @@ app/
 
 ## 执行模式
 
-- `taskType=4`：串行执行，逐条完成并上报
-- `taskType=5`：并行执行，使用 pytest-xdist `-n {max_parallel}`
+- `executeType=1`：串行执行，逐条完成并上报
+- `executeType=2`：并行执行，使用 asyncio.Semaphore 控制最大并发数（由 `max_parallel` 配置）
+  - 每个用例在独立 pytest 进程中执行，互不影响
+  - 单条用例完成后立即上报结果
 
 ## 设计要点
 

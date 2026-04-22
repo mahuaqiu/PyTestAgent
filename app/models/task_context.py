@@ -30,7 +30,7 @@ class TaskContext:
     testcase_block_id: str
     scheduler_block_id: str
     run_round: str
-    task_type: str  # 4串行, 5并行
+    execute_type: int  # 1串行, 2并行
     git_url: str
     branch: str = "master"
     exe_param: Dict = field(default_factory=dict)

@@ -1,9 +1,12 @@
-FROM python:3.11.13-slim-bookworm
+FROM python:3.11-slim-bookworm
 
 WORKDIR /app
 
-# 安装系统依赖
-RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+# 安装系统依赖（git 和 CA 证书）
+RUN apt-get update && apt-get install -y git ca-certificates && rm -rf /var/lib/apt/lists/*
+
+# 配置 git 忽略 SSL 证书验证
+RUN git config --global http.sslVerify false
 
 # 安装 Python 依赖
 COPY requirements.txt .
